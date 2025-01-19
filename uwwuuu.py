@@ -1,9 +1,11 @@
 import asyncio
 import logging
+import os
 import re
 
 import nest_asyncio
 from database import add_schedule, create_db, get_schedule
+from dotenv import load_dotenv
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -17,8 +19,9 @@ logging.basicConfig(level=logging.INFO)
 nest_asyncio.apply()
 
 # Замените 'YOUR_TOKEN' на токен вашего бота
-TOKEN = "7967472307:AAGDGgfSGkDRDhI6j9odVC14PA1rIEhw0co"
-
+# from .env
+load_dotenv()
+TOKEN = os.getenv("API_KEY")
 
 # Регулярное выражение для проверки формата даты (ДД.ММ.ГГГГ)
 DATE_REGEX = r"^\d{2}\.\d{2}\.\d{4}$"
