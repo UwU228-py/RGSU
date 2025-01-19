@@ -3,25 +3,32 @@ import logging
 import re
 
 import nest_asyncio
+from database import add_schedule, create_db, get_schedule
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
-
-from database import create_db, add_schedule, get_schedule
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    ContextTypes,
+    MessageHandler,
+    filters,
+)
 
 logging.basicConfig(level=logging.INFO)
 nest_asyncio.apply()
 
 # Замените 'YOUR_TOKEN' на токен вашего бота
-TOKEN = '7967472307:AAGDGgfSGkDRDhI6j9odVC14PA1rIEhw0co'
+TOKEN = "7967472307:AAGDGgfSGkDRDhI6j9odVC14PA1rIEhw0co"
 
 
 # Регулярное выражение для проверки формата даты (ДД.ММ.ГГГГ)
-DATE_REGEX = r'^\d{2}\.\d{2}\.\d{4}$'
+DATE_REGEX = r"^\d{2}\.\d{2}\.\d{4}$"
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
-        'Привет! Я бот для расписания. Отправьте дату в формате ДД.ММ.ГГГГ для получения расписания или дату и предмет для добавления.')
+        "Привет! Я бот для расписания. Отправьте дату в формате ДД.ММ.ГГГГ для получения расписания или дату и предмет для добавления."
+    )
+
 
 # async def dispAll(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 #     await update.message.reply_text(
@@ -30,7 +37,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message_text = update.message.text.strip()
-    parts = message_text.split(' ', 1)  # Разделяем на дату и предмет (если есть)
+    parts = message_text.split(" ", 1)  # Разделяем на дату и предмет (если есть)
 
     if len(parts) == 0:
         return
@@ -45,31 +52,36 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             # Запрос расписания
             subjects = await get_schedule(date)
             if subjects:
-                subjects_list = '\n'.join([f'{subject[0]}' for subject in subjects])
-                await update.message.reply_text(f'Расписание на {date}:\n{subjects_list}')
+                subjects_list = "\n".join([f"{subject[0]}" for subject in subjects])
+                await update.message.reply_text(
+                    f"Расписание на {date}:\n{subjects_list}"
+                )
             else:
-                await update.message.reply_text(f'Нет расписания на {date}.')
+                await update.message.reply_text(f"Нет расписания на {date}.")
         elif len(parts) == 2:
             # Добавление предмета
-            def add_item (date: str, item: str) -> str:
+            def add_item(date: str, item: str) -> str:
                 """Добавляет предмет в расписание на указанный день."""
+
             subject = parts[1]
             await add_schedule(date, subject)
-            await update.message.reply_text(f'Добавлено: {subject} на {date}.')
+            await update.message.reply_text(f"Добавлено: {subject} на {date}.")
     else:
-        await update.message.reply_text('Неверный формат даты. Используйте ДД.ММ.ГГГГ.')
+        await update.message.reply_text("Неверный формат даты. Используйте ДД.ММ.ГГГГ.")
 
 
 async def main():
     await create_db()  # Создаем базу данных и таблицы
     app = ApplicationBuilder().token(TOKEN).build()
 
-    app.add_handler(CommandHandler('start', start))
+    app.add_handler(CommandHandler("start", start))
     # app.add_handler(CommandHandler('all', dispAll))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))  # Обрабатываем текстовые сообщения
+    app.add_handler(
+        MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message)
+    )  # Обрабатываем текстовые сообщения
 
     app.run_polling()  # Запускаем бота
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

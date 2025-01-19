@@ -9,6 +9,8 @@ readme = "README.md"
 python = "^3.10"
 telegram = "^0.0.1"
 nest-asyncio = "^1.6.0"
+aiosqlite = "^0.20.0"
+python-telegram-bot = "^21.10"
 
 
 [build-system]
